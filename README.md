@@ -39,10 +39,10 @@
 
 ### 1. Split FASTQ
 
-If the FASTQ file obtained from sequencing is too large, running our multiprocessing alignment pipeline may fail due to memory limitations. Therefore, the large FASTQ file should be split into smaller chunks for processing, and the results can be merged afterward. For example, the following command splits the FASTQ file into chunks of 5,000,000 reads each, and outputs the split files to the `split_fastq/` directory:
+If the FASTQ file obtained from sequencing is too large, running our multiprocessing alignment pipeline may fail due to memory limitations. Therefore, the large FASTQ file should be split into smaller chunks for processing, and the results can be merged afterward. For example, the following command splits the FASTQ file into chunks of 5,000,000 reads each, and outputs the split files to the `./test_data/split_fastq/` directory:
 
 ```text
-seqkit split2 input.fastq -s 5000000 -O split_fastq/
+seqkit split2 ./test_data/input.fastq -s 5000000 -O ./test_data/split_fastq/
 ```
 
 ### 2. Run mapping
