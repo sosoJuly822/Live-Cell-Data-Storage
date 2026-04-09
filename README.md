@@ -18,7 +18,7 @@
 ### ③ Analysis
 - Notebook: `xxx.ipynb`
 - Includes:
-  - Sequence loss analysis
+  - Base-by-base error rate
   - Normalized count distribution
   - Reads per million
   - Sequence logo
@@ -51,8 +51,11 @@ python seq_match.py --input split_fastq/ --ref reference.csv --output result.pkl
 ```
 
 ### 3. Run analysis
+
+Before performing PCPM analysis, it is recommended to first check the size of the FASTQ file to determine the total number of bases:
+
 ```text
-jupyter notebook xxx.ipynb
+seqkit size xx.fastq | cut -f1
 ```
 
 ## Input and Output
