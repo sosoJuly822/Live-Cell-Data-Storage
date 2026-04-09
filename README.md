@@ -1,132 +1,69 @@
 # Live-Cell-Data-Storage
 
-## 1 Sequence Matching Module
+## Pipeline Overview
 
-This directory contains the pipeline for reference-assisted analysis of DNA storage sequencing data, including read matching, error profiling, and downstream result processing.
+![pipeline](./figures/pipeline.png)
 
-### Overview
+## Step-by-step Description
 
-The sequence matching workflow is designed to:
+### ① FASTQ preprocessing
+- Tool: `seqkit split2`
+- Purpose: Split large FASTQ files into smaller chunks for parallel processing
 
-Assign sequencing reads (FASTQ) to reference sequences in a predefined library
-Perform multi-stage alignment (primer → index → payload/unique region)
-Generate base-level error statistics (insertion, deletion, substitution, match)
-Support large-scale processing via multiprocessing and cluster execution
+### ② Sequence alignment
+- Script: `seq_match.py`
+- Input: split FASTQ files + reference library
+- Output: `.pkl` file containing mapping results
 
-This pipeline is intended for analysis purposes (e.g., error profiling and sequence recovery evaluation) and assumes access to the reference library.
+### ③ Analysis
+- Notebook: `xxx.ipynb`
+- Includes:
+  - Sequence loss analysis
+  - Normalized count distribution
+  - Reads per million
+  - Sequence logo
 
-### File Structure
+### ④ Clustering and consensus
+- Script: `count_reads.py`
+- Purpose:
+  - Cluster similar reads
+  - Generate consensus sequences
+- Output: `.pkl`
 
-```text
-1_Sequence_matching/
-├── analysis_result.ipynb
-├── analysis_result.py
-├── cpu-fanlab-cluster_library_read1.slurm
-├── FINAL.xlsx
-├── result_output.sh
-└── seq_match_multiprocessing.py
-```
+### ⑤ Visualization
+- Notebook: `xxx.ipynb`
+- Includes:
+  - Reads required for file recovery
 
-#### Core Scripts
+## Quick Start
 
-`FINAL.xlsx` Reference library containing all designed DNA sequences used for read assignment.
+### 1. Split FASTQ
 
-`seq_match_multiprocessing.py` The main pipeline for sequence matching and error counting:
-
-- Reads FASTQ files
-- Filters reads based on quality
-- Performs primer localization and sequence matching
-- Asigns reads to reference sequences
-- Outputs per-position error statistics as `.pkl` files
-
-`analysis_result.py/ipynb` Scripts for analyzing the generated error dictionaries (`.pkl`), including: 
-
-- Error rate calculation
-- Distribution analysis
-- Visualization
-
-#### Execute Script
-
-Use the SLURM script to process large datasets:
+If the FASTQ file obtained from sequencing is too large, running our multiprocessing alignment pipeline may fail due to memory limitations. Therefore, the large FASTQ file should be split into smaller chunks for processing, and the results can be merged afterward. For example, the following command splits the FASTQ file into chunks of 5,000,000 reads each, and outputs the split files to the `split_fastq/` directory:
 
 ```text
-sbatch cpu-fanlab-cluster_library_read1.slurm
+seqkit split2 input.fastq -s 5000000 -O split_fastq/
 ```
 
-Convert `.pkl` results into CSV and compute error rates:
-
+### 2. Run mapping
 ```text
-bash result_output.sh
+python seq_match.py --input split_fastq/ --ref reference.csv --output result.pkl
 ```
 
-## 2 Single Select Module
-
-This directory contains scripts for evaluating sequence recovery efficiency under different sequencing depths via random downsampling and read traversal analysis.
-
-
-### File Structure
+### 3. Run analysis
 ```text
-1_Single_select/
-├── run_downsampling_cellpool.sh
-├── run_downsampling_ID1.sh
-├── run_downsampling_ID5000.sh
-├── run_downsampling_ID10000.sh
-├── run_downsampling_ID20000.sh
-├── run_downsampling_ID30000.sh
-├── single_select_count_reads_1Indexs.py
-├── single_select_count_reads_10Indexs.py
-└── single_select_findTrueIndex_multiprocessing.py
+jupyter notebook xxx.ipynb
 ```
 
-#### Workflow
+## Input and Output
 
-1. Random Downsampling
-   
-    Run one of the provided shell scripts to generate downsampled FASTQ files:
+### Input
+- FASTQ files
+- Reference library (CSV/XLSX)
 
-    ```text
-    bash run_downsampling_ID10000.sh
-    ```
-
-    Each script produces a downsampled FASTQ dataset corresponding to a specific experimental condition or sequencing depth.
-
-2. Parameter Configuration
-   
-    Before running the recovery analysis, the script
-`single_select_count_reads_10Indexs.py` must be manually configured according to the downsampled dataset.
-
-Specifically, users need to modify:
-
-fastq_name → name of the downsampled FASTQ file
-Single_ids_list → list of target reference indices
-output_file_name → output file name
-
-An example configuration is shown below:
-
-| Dataset       | FASTQ file               | Single_ids_list                                   | Output file                                                |
-|---------------|--------------------------|---------------------------------------------------|------------------------------------------------------------|
-| Cell pool     | PB-222_1_depth_30x       | [1-1, 5000-1, 10000-1, 20000-1, 30000-1]         | single_select_cellpool_count_reads_for_perfect_recovery.pkl |
-| ID1           | BG192_1_depth_30x        | [1-1]                                             | single_select_ID1_count_reads_for_perfect_recovery.pkl     |
-| ID5000        | BG-233_1_depth_30x       | [5000-1]                                          | single_select_ID5000_count_reads_for_perfect_recovery.pkl  |
-| ID10000       | BG252_1_depth_30x        | [10000-1]                                         | single_select_ID10000_count_reads_for_perfect_recovery.pkl |
-| ID20000       | BG284_1_depth_30x        | [20000-1]                                         | single_select_ID20000_count_reads_for_perfect_recovery.pkl |
-| ID30000       | BG-JX29_1_depth_30x      | [30000-1]                                         | single_select_ID30000_count_reads_for_perfect_recovery.pkl |
-
-3. Recovery Analysis
-
-    After configuring the parameters, run the appropriate script depending on the number of target sequences:
-
-    Multiple sequences (e.g., cell pool)
-
-    ```bash
-    python single_select_count_reads_10Indexs.py
-    ```
-
-    Single sequence:
-
-    ```text
-    python single_select_count_reads_1Indexs.py \
-    --fastq_name PB-222_1_depth_30x \
-    --single_ids_list 0 \
-    --output_file_name single_select_ID1_count_reads_for_perfect_recovery.pkl
-    ```
+### Output
+- PKL files (intermediate results)
+- Figures:
+  - Sequence logo
+  - Error distribution
+  - Coverage plots
