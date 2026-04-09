@@ -58,11 +58,15 @@ Before performing PCPM analysis, it is recommended to first check the size of th
 seqkit size xx.fastq | cut -f1
 ```
 
+To estimate the number of reads required for data recovery, multiple runs are performed and averaged. Therefore, the original FASTQ file is randomly downsampled multiple times, followed by execution of the `count_reads.py` script.
+
+The downsampling procedure is provided in `run_downsampling.sh`, where file paths, sequencing depth (coverage), and the number of repetitions can be adjusted as needed.
+
 ## Input and Output
 
 ### Input
 - FASTQ files
-- Reference library (CSV/XLSX)
+- Reference library (XLSX)
 
 ### Output
 - PKL files (intermediate results)
@@ -70,3 +74,4 @@ seqkit size xx.fastq | cut -f1
   - Sequence logo
   - Error distribution
   - Coverage plots
+  - ……

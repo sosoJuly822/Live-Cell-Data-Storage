@@ -180,12 +180,9 @@ def main(args):
     # 获取所有的引物，用于后面遍历搜索
     primer_dict = read_primers(args.primer_file)
 
-    if '_1' in args.fastq_name:  # 正向
-        is_reverse = False
-    elif '_2' in args.fastq_name:  # 反向互补
-        is_reverse = True
+    is_reverse = args.is_reverse
 
-    single_ids_list = [int(key[2:])-1 for key in primer_dict.keys()]
+    single_ids_list = [id-1 for id in args.target_ids]
 
     # 获取目标的文件列表
     fastq_files = find_fastq_files(args.fastq_folder, args.fastq_name)
@@ -382,23 +379,26 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--library_file', type=str, 
-                        default='/home/liuycomputing/wsp_sequencing/data/FINAL_20250607.xlsx')
+                        default='/home/liuycomputing/wsp_sequencing/Live-Cell-Data-Storage/test_data/ten_primers_library.xlsx')
     parser.add_argument('--primer_file', type=str, 
-                        default='/home/liuycomputing/wsp_sequencing/codes/process_20251218/primers.txt')
+                        default='/home/liuycomputing/wsp_sequencing/Live-Cell-Data-Storage/test_data/ten_primers.txt')
 
     parser.add_argument('--fastq_folder', type=str,
-                        default='/home/liuycomputing/wsp_sequencing/data/seq_20251217/crispr_select/downsampling_experiments/subsampled_fastq/')
+                        default='/home/liuycomputing/wsp_sequencing/Live-Cell-Data-Storage/test_data/')
     parser.add_argument('--fastq_name', type=str,
-                        default='BG-2240_1_depth_30x')
+                        default='one_primer_depth_30x')
     parser.add_argument('--expected_samples', type=int, default=10)
     parser.add_argument('--seq_len', type=int, default=118)
+    parser.add_argument('--is_reverse', action='store_true')  # 测序方向
+
+    parser.add_argument('--target_ids', type=int, nargs='+', default=[1])  # 目标ID列表，默认为[1]
 
     parser.add_argument('--q_threshold', type=float, default=30.0)
     
     parser.add_argument('--output_folder', type=str,
-                        default='/home/liuycomputing/wsp_sequencing/codes/process_20251218/crispr_select/')
+                        default='/home/liuycomputing/wsp_sequencing/Live-Cell-Data-Storage/test_data/')
     parser.add_argument('--output_file_name', type=str,
-                        default='crispr_select_before_count_reads_for_perfect_recovery.pkl')
+                        default='one_primer_count_reads_for_perfect_recovery.pkl')
     
     args = parser.parse_args()
 
