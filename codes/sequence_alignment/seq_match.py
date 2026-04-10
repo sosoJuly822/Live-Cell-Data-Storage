@@ -313,7 +313,7 @@ def main(args):
     sequence_data_list = list(read_fastq(args.file_folder + args.fastq_name))
 
     # 根据进程数划分数据集
-    sequence_data_list = sequence_data_list[:100]
+    # sequence_data_list = sequence_data_list[:100]  # 少量数据调试
     num_processes = min(args.num_processes, multiprocessing.cpu_count())  # 限制进程数为 CPU 核数
     chunk_size = len(sequence_data_list) // num_processes
     sequence_chunks = [sequence_data_list[i:i + chunk_size] for i in range(0, len(sequence_data_list), chunk_size)]
@@ -363,7 +363,7 @@ if __name__ == '__main__':
     parser.add_argument('--q_threshold', type=float, default=30.0)
 
     parser.add_argument('--output_folder', type=str,
-                        default='/home/liuycomputing/wsp_sequencing/Live-Cell-Data-Storage/test_data/')
+                        default='/home/liuycomputing/wsp_sequencing/tmp-files/')
     parser.add_argument('--error_file_name', type=str, default='seq_match_result_of_ten_primers.pkl')
 
     parser.add_argument('--num_processes', type=int, default=1)  # 线程数参数
